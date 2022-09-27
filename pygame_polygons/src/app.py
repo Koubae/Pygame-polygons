@@ -34,7 +34,7 @@ class App:
 
         # Load fonts
         self.font: pygame.font.SysFont = pygame.font.SysFont("Ariel", 24)
-        self.font_small: pygame.font.SysFont = pygame.font.SysFont("Roboto", 20)
+        self.font_small: pygame.font.SysFont = pygame.font.SysFont("lucidasans", 12)
         # gui fonts
         self.font_gui_family: str = GUI_STYLES["gui"]["font"]["font_family"]
         self.font_gui_size: int = GUI_STYLES["gui"]["font"]["font_size"]

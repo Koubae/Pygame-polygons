@@ -2,13 +2,26 @@ from math import pi, cos, sin
 import pygame
 from pygame.math import Vector2
 
-from ..shapes import get_polygon_centroid, polygon_rotate, polygon_move
+from ..shapes import get_polygon_centroid, polygon_rotate, polygon_move, draw_regular_polygon
 
 
 class ShapeController:
 
     def __init__(self):
         ...
+
+    @staticmethod
+    def make_polygon(vertex_count: int, radius: int, position: tuple):
+        """Creates a polygon defined by its vertex count, radius (size) and x,y coordinates
+
+        :param vertex_count: int min 3. Total amount of the polygon vertex
+        :param radius: int the size of the polygon
+        :param position: tuple x,y coordinates
+        :return:
+        """
+        if vertex_count < 3:
+            vertex_count = 3
+        return draw_regular_polygon(vertex_count, radius, position)
 
     @staticmethod
     def shape_get_center(polygon: list[Vector2]) -> Vector2:
@@ -32,9 +45,6 @@ class ShapeController:
         vertex_x_diff = abs(mouse_x - vertex_x)
         vertex_y_diff = abs(mouse_y - vertex_y)
         return vertex_y_diff < margin and vertex_x_diff < margin
-
-
-
 
 
     @staticmethod
