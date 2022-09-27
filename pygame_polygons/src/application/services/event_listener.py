@@ -1,8 +1,9 @@
 import pygame
+from typing import Optional
 from ...config.constants import MOUSE_BUTTON_MAP, MOUSE_WHEEL
 
-class EventListener:
 
+class EventListener:
 
     def __init__(self, app):
         self.app = app
@@ -43,3 +44,30 @@ class EventListener:
                     self.events[event.type][event.key] = True
             except KeyError:
                 continue
+
+    # ---------------------------
+    # Event utiliy and api
+    # ---------------------------
+
+    def event_get_mouse_wheel(self) -> Optional[str]:
+        """Returns the wheel action or None if no wheel action currently is fired
+
+        :return: str|None
+        """
+        if not self.is_mouse_wheel_event():
+            return None
+        action = self.events[pygame.MOUSEWHEEL]
+        if 'WHEEL_UP' in action:
+            return 'WHEEL_UP'
+        elif 'WHEEL_DOWN' in action:
+            return 'WHEEL_DOWN'
+        return None
+
+    def is_mouse_button_pressed_event(self) -> bool:
+        return pygame.MOUSEBUTTONDOWN in self.events
+
+    def is_mouse_button_released_event(self) -> bool:
+        return pygame.MOUSEBUTTONUP in self.events
+
+    def is_mouse_wheel_event(self) -> bool:
+        return pygame.MOUSEWHEEL in self.events

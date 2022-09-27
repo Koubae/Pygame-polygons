@@ -36,7 +36,7 @@ class GuiButton(GuiPanel):
             self.register_default_element_values()  # re-register default values
 
         self.text: str = text
-        self.text_img = self.font.render(self.text, True, self.font_color)
+        self.text_img = self.app.font_gui.render(self.text, True, self.app.font_gui_color)
 
         # events
         self.mouse_pointer = pygame.SYSTEM_CURSOR_HAND

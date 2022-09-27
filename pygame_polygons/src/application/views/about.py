@@ -27,14 +27,12 @@ class ViewAbout(ViewManager):
             self.close_view = True
 
         div.add_event_listener("click", view_home)
-        print("hello")
 
 
         about_text1 = """This Application is created by Federico Bau federicobau.dev © Copyright 2022"""
-        font = pygame.font.SysFont("Ariel", 24)
-        font_img = font.render(about_text1, True, (255, 255, 255))
+        font_img = self.app.font.render(about_text1, True, (255, 255, 255))
         about_text2 = """and is used for creating Pygame GUI applications or just add GUI functionalities to a Pygame Game"""
-        font_img2 = font.render(about_text2, True, (255, 255, 255))
+        font_img2 = self.app.font.render(about_text2, True, (255, 255, 255))
 
         def _update():
             components_gui.draw(self.app.background)

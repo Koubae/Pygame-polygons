@@ -57,12 +57,6 @@ class GuiElement(pygame.sprite.Sprite):
         self.parent = parent
         self.children: pygame.sprite.Group = pygame.sprite.Group()
 
-        # font
-        self.font_family: str = GUI_STYLES["gui"]["font"]["font_family"]
-        self.font_size: int = GUI_STYLES["gui"]["font"]["font_size"]
-        self.font_color: tuple = GUI_STYLES["gui"]["font"]["font_color"]
-        self.font = pygame.font.SysFont(self.font_family, self.font_size) # todo: move to app level !!!
-
         # events
         # Note: Event names are analogous and inspired directly by Javascript DOM Api event
         # @docs https://developer.mozilla.org/en-US/docs/Web/Events#event_listing
@@ -132,7 +126,6 @@ class GuiElement(pygame.sprite.Sprite):
     # -----------------------
     # Events handlers
     # -----------------------
-
     def add_event_listener(self, event: str, listener: callable) -> Any:
         """Sets up a function that will be called whenever the specified event is delivered to the target.
 
@@ -147,6 +140,10 @@ class GuiElement(pygame.sprite.Sprite):
             raise AttributeError(f'Event {event} not supported in events list {list(self.events.keys())}')
         # register the event
         self.events[event].append(listener)
+
+    # -----------------------
+    # API Low
+    # -----------------------
 
     def _register_mouse_hover(self) -> str:
         mouse_leaved = self._is_mouse_leave()

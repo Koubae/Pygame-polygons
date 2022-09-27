@@ -1,6 +1,6 @@
 from typing import Optional
-import pygame
 from .application.services.event_listener import EventListener
+from .config.constants import *
 
 class App:
     DEFAULT_DISPLAY: int = 0
@@ -31,6 +31,16 @@ class App:
         self.background: pygame.Surface = background
 
         self.event_listener: EventListener = EventListener(self)
+
+        # Load fonts
+        self.font: pygame.font.SysFont = pygame.font.SysFont("Ariel", 24)
+        self.font_small: pygame.font.SysFont = pygame.font.SysFont("Roboto", 20)
+        # gui fonts
+        self.font_gui_family: str = GUI_STYLES["gui"]["font"]["font_family"]
+        self.font_gui_size: int = GUI_STYLES["gui"]["font"]["font_size"]
+        self.font_gui_color: tuple = GUI_STYLES["gui"]["font"]["font_color"]
+        self.font_gui = pygame.font.SysFont(self.font_gui_family, self.font_gui_size)  # todo: move to app level !!!
+
 
         # views
         self.view_current: Optional[str] = None
