@@ -111,6 +111,17 @@ class GuiElement(pygame.sprite.Sprite):
         self.image.fill(self.background_color)
         self.image.fill((0, 0, 0))
 
+    def move_gui_into(self, position: Vector2) -> None:
+        """Move the gui component at exatly x, y coordinates
+
+        :param position: Vector2 x,y coords of the new position
+        :return:
+        """
+        self.rect.topleft = position
+        self.pos = position
+        self.image.get_rect(topleft=position)
+
+
     def register_default_element_values(self):
         """Register to a secondary property a value that may change in time, so by calling
             [prop_name..]_default can have back the initial value

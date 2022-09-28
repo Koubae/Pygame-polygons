@@ -12,6 +12,8 @@ class ViewHome(ViewManager):
     SHAPE_VERTEX_MIN: int = 3
     SHAPE_VERTEX_MAX: int = 100
 
+    VIEW_MODES: tuple = ('polygons', 'polygon_selecting', 'polygon_selected')
+
     def __init__(self, *args):
         super().__init__(*args)
 
@@ -22,6 +24,8 @@ class ViewHome(ViewManager):
         self.shape_new_vertex: int = 3
         self.current_figure: tuple = ()
         self.current_figure_center: Optional[int] = None
+        self.current_selected_polygon: Optional[int] = None
+        self.mode: str = self.VIEW_MODES[0]
 
         # ------------- INPUTS ------------- #
 
@@ -31,7 +35,6 @@ class ViewHome(ViewManager):
 
         # keyboard
         self.event_ctrl_l: Optional[str] = None
-
 
     def register_mouse_action(self, hooked: bool):
         """Register user mouse actions.
@@ -64,9 +67,23 @@ class ViewHome(ViewManager):
             is_ctrl_l_pressed = self.app.event_listener.is_ctrl_left_pressed_event()
             self.event_ctrl_l = is_ctrl_l_pressed and 'PRESSED' or None
 
+        if self.event_ctrl_l == 'RELEASED' and self.current_selected_polygon is None:
+            self.keyboard_reset_selected_polygon()
+
+        elif self.event_ctrl_l == 'PRESSED' and self.mode == 'polygons':
+            # Initalize the 'selection' mode
+            self.mode = self.VIEW_MODES[1]
+
+    def keyboard_reset_selected_polygon(self):
+        self.current_selected_polygon = None
+        self.mode = self.VIEW_MODES[0]
+
     def mouse_reset_drag_and_pointer(self) -> None:
         """Resets Mouse drag event actions and set default mouse pointer"""
-        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+        if self.mode == 'polygon_selecting':
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        else:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
         self.mouse_reset_drag()
 
     def mouse_reset_drag(self) -> None:
@@ -109,6 +126,7 @@ class ViewHome(ViewManager):
 
         if ShapeController.shape_vertex_is_near_mouse_pointer(mouse_current, centroid,
                                                               margin):  # give some pixel of margin
+
             self.current_figure = ()
             self.current_figure_center = poly_index
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
@@ -144,39 +162,56 @@ class ViewHome(ViewManager):
         :return: bool True if a polygon is currently withing a user event , False otherwise
         """
 
-        hooked = False
+        hooked: Optional[str] = None
         for poly_index, poly in enumerate(self.polygons):
-            centroid = poly.centroid
-            poly.draw()
-            vertices: list[Vector2] = poly.vertices
+            is_hooked = self._render_polygon(poly_index, mouse_current, hooked, is_selected=False)
+            if is_hooked and not hooked:
+                hooked = is_hooked
 
+            if hooked == "HOOKED_CENTER":
+                # Check the mode.
+                if self.mode == 'polygon_selecting':
+                    self.current_selected_polygon = poly_index
+                    self.mode = self.VIEW_MODES[2]
+                    break  # break execution of loop immediatelly
+        return bool(hooked)
 
-            matches: list[Vector2] = []
-            matches_previous_polygon: Optional[Vector2] = None
-            # First, wee need to collect all vertex and check if there is a match. That's because
-            # we need to know whether the user is still draggin the same vertex around. Else if we have a match
-            # the new match found is the new vertex.
-            for vertex_index, vertex in enumerate(vertices):
+    def _render_polygon(self, poly_index: int, mouse_current: tuple, hooked: Optional[str], is_selected: bool = False) -> \
+    Optional[str]:
+        polygon: Polygon = self.get_selected_polygon(poly_index)
+        if not polygon and is_selected:
+            self.keyboard_reset_selected_polygon()
+            return None
 
-                poly.write_vertex_coords(vertex)
+        polygon.draw()
+        centroid: Vector2 = polygon.centroid
 
-                margin, current = self._get_point_detection_margin(poly_index, vertex_index)
+        matches: list[Vector2] = []
+        # First, wee need to collect all vertex and check if there is a match. That's because
+        # we need to know whether the user is still draggin the same vertex around. Else if we have a match
+        # the new match found is the new vertex.
+        matches_previous_polygon: Optional[Vector2] = self._render_polygon_vertices(polygon, matches, poly_index,
+                                                                                    mouse_current)
+        # Check if the user is near the center of the polygon
+        if not hooked:
+            is_it = self.is_near_poly_centroid(poly_index, mouse_current, centroid)
+            if is_it:
+                return "HOOKED_CENTER"
 
-                if ShapeController.shape_vertex_is_near_mouse_pointer(mouse_current, vertex,
-                                                                      margin):  # give some pixel of margin
-                    matches.append(Vector2(poly_index, vertex_index))
-                    if current:  # if the current object then we can just exit the loop
-                        matches_previous_polygon = Vector2(poly_index, vertex_index)
-                        break
-            # Check if the user is near the center of the polygon
-            if not hooked:
-                is_it = self.is_near_poly_centroid(poly_index, mouse_current, centroid)
-                if is_it:
-                    hooked = True
-                    continue
-                hooked = self.highlight_polygon_vertex(matches_previous_polygon, matches)
+        hooked = self.highlight_polygon_vertex(matches_previous_polygon, matches)
+        return hooked and "HOOKED_VERTEX" or None
 
-        return hooked
+    def _render_polygon_vertices(self, polygon: Polygon, matches: list[Vector2], poly_index: int, mouse_current: tuple):
+        vertices: list[Vector2] = polygon.vertices
+        for vertex_index, vertex in enumerate(vertices):
+            polygon.write_vertex_coords(vertex)
+
+            margin, current = self._get_point_detection_margin(poly_index, vertex_index)
+            if ShapeController.shape_vertex_is_near_mouse_pointer(mouse_current, vertex,
+                                                                  margin):  # give some pixel of margin
+                matches.append(Vector2(poly_index, vertex_index))
+                if current:  # if the current object then we can just exit the loop
+                    return Vector2(poly_index, vertex_index)
 
     def view_logic(self):
         # inputs
@@ -296,9 +331,34 @@ class ViewHome(ViewManager):
         # add child to panel
         panel_left.children_add(button_navigate_about)
 
-        def _update():
+        # -------------------
+        # Polygon context window
+        # panel
+        polygon_settings_gui = pygame.sprite.Group()
+        polygon_settings_size = Vector2(500, 350)
+        polygon_settings_window = GuiPanel(Vector2(0, 0), polygon_settings_size, self.app, self.app.background, None, {
+            'background_color': (51, 206, 255, 55)
+        })
+        polygon_settings_gui.add(polygon_settings_window)
 
-            # print(self.app.event_listener.events)
+        def close_settings_window(event: dict):
+            if 'MOUSE_LEFT' not in event:
+                return
+            self.mode = self.VIEW_MODES[0]
+            self.current_selected_polygon = None
+
+        btn_poly_setting_close_size: Vector2 = Vector2(35, 25)
+        btn_poly_setting_close = GuiButton("X", Vector2((polygon_settings_size.x - 50), 10),
+                                           btn_poly_setting_close_size,
+                                           self.app, polygon_settings_window.image, polygon_settings_window, {
+                                               'background_color': pygame.Color("grey"),
+                                               'border_color': pygame.Color("grey")
+                                           })
+        btn_poly_setting_close.add_event_listener("click", close_settings_window)
+        # add child to panel
+        polygon_settings_window.children_add(btn_poly_setting_close)
+
+        def _update():
 
             # Update Gui Components
             components_gui.draw(self.app.background)
@@ -314,10 +374,39 @@ class ViewHome(ViewManager):
             mouse_x = mouse_current[0]
             mouse_y = mouse_current[1]
 
+            if self.mode == 'polygon_selected' and self.current_selected_polygon is not None:
+                polygon: Polygon = self.get_selected_polygon(self.current_selected_polygon)
+                if not polygon:
+                    self.keyboard_reset_selected_polygon()
+                else:
+                    centroid = polygon.centroid
+                    # now we need to determine the position of the center of the polygon, Is it in the
+                    # we devide the screen in 4 (TOP-LEFT, TOP-RIGHT, BOTTOM-LEFT, BOTTOM-RIGHT)
+                    # add set to opposite direction
+                    # now, we make the position of the window setting the oppposite of the selected coordinates
+                    setting_window_position: Optional[Vector2] = self.app.get_window_opposite_position(centroid,
+                                                                                                       polygon_settings_size)
+                    if setting_window_position:
+                        # move context polygon ssetting window
+                        polygon_settings_window.move_gui_into(setting_window_position)
+                        btn_poly_setting_close.move_gui_into(Vector2(
+                            polygon_settings_size.x + (
+                                    abs(setting_window_position.x) - (abs(btn_poly_setting_close_size.x) * 2)),
+                            abs(btn_poly_setting_close_size.y + setting_window_position.y)
+                        ))
+                        # Update Gui Components
+                        polygon_settings_gui.draw(self.app.background)
+                        polygon_settings_gui.update()
+
             # ---------------------------------------------------------
             # SHAPES
             # ---------------------------------------------------------
-            hooked: bool = self._render_polygons(mouse_current)
+            if self.mode == 'polygon_selected' and self.current_selected_polygon is not None:
+                hooked: bool = bool(
+                    self._render_polygon(self.current_selected_polygon, mouse_current, False, is_selected=True))
+            else:
+                hooked: bool = self._render_polygons(mouse_current)
+
             # -------------------------------------------------------- #
 
             # ---------------------------------------------------------
@@ -325,8 +414,6 @@ class ViewHome(ViewManager):
             # ---------------------------------------------------------
             self.register_mouse_action(hooked)
             self.register_keyboard_action(hooked)
-            if self.event_ctrl_l:
-                print(self.event_ctrl_l)
 
             # .............. drag center ............... #
             if self.current_figure_center is not None and self.current_figure_drag:
@@ -354,6 +441,18 @@ class ViewHome(ViewManager):
     # -----------------
     # Utility functions
     # -----------------
+    def get_selected_polygon(self, poly_index: int) -> Optional[Polygon]:
+        """Retrieves the selected Polygon
+        :param poly_index: int
+        :return: Polygon|None
+        """
+        try:
+            polygon: Polygon = self.polygons[poly_index]
+        except IndexError as err:
+            print(err)  # todo: print error in window!
+            return None
+        else:
+            return polygon
 
     def vertex_dot_focus(self, polygon_index: Vector2) -> None:
         """Focus a Vertex, make it in a red dot
@@ -388,4 +487,3 @@ class ViewHome(ViewManager):
             margin *= 55
             current = True
         return margin, current
-
