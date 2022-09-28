@@ -2,8 +2,8 @@ from math import pi, cos, sin
 import pygame
 from pygame.math import Vector2
 
-from ..shapes import get_polygon_centroid, polygon_rotate, polygon_move, draw_regular_polygon
-
+from ..shapes import Polygon
+# from ...app import App
 
 class ShapeController:
 
@@ -11,21 +11,21 @@ class ShapeController:
         ...
 
     @staticmethod
-    def make_polygon(vertex_count: int, radius: int, position: tuple):
+    def make_polygon(app, vertex_count: int, radius: int, position: tuple) -> Polygon:
         """Creates a polygon defined by its vertex count, radius (size) and x,y coordinates
 
+        :param screen: pygame.Surface
         :param vertex_count: int min 3. Total amount of the polygon vertex
         :param radius: int the size of the polygon
         :param position: tuple x,y coordinates
-        :return:
+        :return: Polygon
         """
         if vertex_count < 3:
             vertex_count = 3
-        return draw_regular_polygon(vertex_count, radius, position)
 
-    @staticmethod
-    def shape_get_center(polygon: list[Vector2]) -> Vector2:
-        return get_polygon_centroid(polygon)  # get the polygon centroid
+        polygon = Polygon(app, vertex_count, radius, Vector2(position[0], position[1]))
+
+        return polygon
 
     @staticmethod
     def shape_centroid_is_near_mouse_pointer(mouse: tuple, centroid: Vector2, margin: int) -> bool:
@@ -48,7 +48,7 @@ class ShapeController:
 
 
     @staticmethod
-    def move_polygon(polygons: list[list[Vector2]], current_polygon: int, mouse_position: tuple[int, int]):
+    def move_polygon(polygons: list[Polygon], current_polygon: int, mouse_position: tuple[int, int]) -> None:
         """Move a polygon setting its center to the mouse position
 
         :param polygons: list[list[Vector2]] List of polygon
@@ -57,13 +57,21 @@ class ShapeController:
         :return:
         """
         try:
-            polygon = polygons[current_polygon]  # get the polygon
+            polygon: Polygon = polygons[current_polygon]  # get the polygon
         except IndexError:
             return
-        polygon_move(polygon, Vector2(mouse_position[0], mouse_position[1]))
+        polygon.move(Vector2(mouse_position[0], mouse_position[1]))
 
     @staticmethod
-    def rotate_polygon(polygons: list[list[Vector2]], current_polygon: int, direction: str) -> None:
+    def polygon_move_vertex(polygons: list[Polygon], indexes: tuple[int, int], mouse_position: tuple[int, int]) -> None:
+        try:
+            polygon: Polygon = polygons[indexes[0]]  # get the polygon
+        except IndexError:
+            return
+        polygon.move_vertix(indexes[1],  Vector2(mouse_position[0], mouse_position[1]))
+
+    @staticmethod
+    def rotate_polygon(polygons: list[Polygon], current_polygon: int, direction: str) -> None:
         """Rotates a Polygon clockwise - counter clock-wise
 
         :param polygons: list[list[Vector2]] List of polygon
@@ -82,16 +90,17 @@ class ShapeController:
             angle = -angle
 
         try:
-            polygon = polygons[current_polygon]  # get the polygon
+            polygon: Polygon = polygons[current_polygon]  # get the polygon
         except IndexError:
             return
-
-        centroid = get_polygon_centroid(polygon)  # get the polygon centroid
-        polygon_rotated = polygon_rotate(polygon, centroid, angle)  # rotate polygon
-        polygons[current_polygon] = polygon_rotated
+        vertices: list[Vector2] = polygon.vertices
+        centroid = Polygon.get_polygon_centroid(vertices)  # get the polygon centroid
+        polygon_rotated = Polygon.polygon_rotate(vertices, centroid, angle)  # rotate polygon
+        polygon.update_vertices_positions(polygon_rotated)
+        polygon.centroid = polygon.vertices  # reset the polygon centroid
 
     @staticmethod
-    def draw_stars(screen: pygame.Surface, stars: list[list[Vector2]]) -> None:
+    def draw_stars(screen: pygame.Surface, stars: list[Polygon]) -> None:
         """Stars are drawn and rotating counter-clockwise
 
         :param screen: pygame.Surface Screen were stars needs to be drawn
@@ -102,9 +111,11 @@ class ShapeController:
             return
             # make the star roating continously making double adges
         for i, star in enumerate(stars):
-            centroid = get_polygon_centroid(star)
+            vertices: list[Vector2] = star.vertices
+
+            centroid = Polygon.get_polygon_centroid(vertices)
             pygame.draw.circle(screen, (79, 0, 153),  # draw red dot around vertex
                                Vector2(centroid[0], centroid[1]), 5)
-            pygame.draw.polygon(screen, pygame.Color("pink"), star, width=2)
-            star_rotated = polygon_rotate(star, centroid, -45)
-            stars[i] = star_rotated
+            pygame.draw.polygon(screen, pygame.Color("pink"), vertices, width=2)
+            star_rotated = Polygon.polygon_rotate(vertices, centroid, -45)
+            star.update_vertices_positions(star_rotated)

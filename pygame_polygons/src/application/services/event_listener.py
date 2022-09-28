@@ -63,6 +63,7 @@ class EventListener:
             return 'WHEEL_DOWN'
         return None
 
+    # ~~~~~~~~~~~~~~~~~ mouse ~~~~~~~~~~~~~~~~~ #
     def is_mouse_button_pressed_event(self) -> bool:
         return pygame.MOUSEBUTTONDOWN in self.events
 
@@ -71,3 +72,11 @@ class EventListener:
 
     def is_mouse_wheel_event(self) -> bool:
         return pygame.MOUSEWHEEL in self.events
+
+    # ~~~~~~~~~~~~~~~~~ keyboard ~~~~~~~~~~~~~~~~~ #
+
+    def is_ctrl_left_pressed_event(self) -> bool:
+        return pygame.KEYDOWN in self.events and pygame.K_LCTRL in self.events[pygame.KEYDOWN]
+
+    def is_ctrl_left_released_event(self) -> bool:
+        return pygame.KEYUP in self.events and pygame.K_LCTRL in self.events[pygame.KEYUP]

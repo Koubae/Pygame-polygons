@@ -3,7 +3,7 @@ from .application.services.event_listener import EventListener
 from .config.constants import *
 
 class App:
-    DEFAULT_DISPLAY: int = 0
+    DEFAULT_DISPLAY: int = 1
 
     def __init__(self, app_name: str, app: dict, world: dict, ):
         self.app_name: str = app_name

@@ -11,7 +11,7 @@ DISPLAY_HEIGHT: int = display_info.current_h
 
 FLOOR_CHUNK: int = 64
 SCREEN_SIZE: list = ["small", "medium", "large"]
-SCREEN_SELECT: str = SCREEN_SIZE[2]
+SCREEN_SELECT: str = SCREEN_SIZE[1]
 SCREEN_SIZE_CALCS: list = ["static", "dynamic"]  # static: fix number | dynamic : calcualtes from the pc display size
 SCREEN_SIZE_TYPE: str = SCREEN_SIZE_CALCS[1]
 if SCREEN_SIZE_TYPE == "static":

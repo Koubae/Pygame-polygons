@@ -5,6 +5,7 @@ from ..gui import GuiPanel, GuiButton
 from .view_manager import ViewManager
 
 from ..services import ShapeController
+from ..shapes import Polygon
 
 
 class ViewHome(ViewManager):
@@ -14,15 +15,23 @@ class ViewHome(ViewManager):
     def __init__(self, *args):
         super().__init__(*args)
 
+        # Shapes
+        self.polygons: list[Polygon] = []
+        self.stars: list[Polygon] = []
+
         self.shape_new_vertex: int = 3
         self.current_figure: tuple = ()
         self.current_figure_center: Optional[int] = None
-        self.current_figure_wheel: Optional[bool] = False
+
+        # ------------- INPUTS ------------- #
+
+        # mouse
+        self.current_figure_wheel: bool = False
         self.current_figure_drag: bool = False
 
-        # Shapes
-        self.polygons: list[list[Vector2]] = []
-        self.stars: list[list[Vector2]] = []
+        # keyboard
+        self.event_ctrl_l: Optional[str] = None
+
 
     def register_mouse_action(self, hooked: bool):
         """Register user mouse actions.
@@ -43,6 +52,17 @@ class ViewHome(ViewManager):
                 self.mouse_init_drag()
             elif self.app.event_listener.is_mouse_button_released_event():  # mouse release
                 self.mouse_reset_drag()
+
+    def register_keyboard_action(self, hooked: bool):
+
+        if not hooked:
+            ...
+        if self.event_ctrl_l == 'PRESSED':
+            is_ctrl_l_released = self.app.event_listener.is_ctrl_left_released_event()
+            self.event_ctrl_l = is_ctrl_l_released and 'RELEASED' or 'PRESSED'
+        else:
+            is_ctrl_l_pressed = self.app.event_listener.is_ctrl_left_pressed_event()
+            self.event_ctrl_l = is_ctrl_l_pressed and 'PRESSED' or None
 
     def mouse_reset_drag_and_pointer(self) -> None:
         """Resets Mouse drag event actions and set default mouse pointer"""
@@ -108,7 +128,7 @@ class ViewHome(ViewManager):
         if matches:
             match = matches[0]  # todo: should get the vertex with closest to mouse and not the first found
             self.vertex_dot_focus(match)
-            self.current_figure = (match[0], match[1])
+            self.current_figure = (int(match[0]), int(match[1]))
             self.current_figure_center = None
 
             return True
@@ -126,8 +146,9 @@ class ViewHome(ViewManager):
 
         hooked = False
         for poly_index, poly in enumerate(self.polygons):
-            centroid = ShapeController.shape_get_center(poly)
-            self.polygon_draw(poly, centroid)
+            centroid = poly.centroid
+            poly.draw()
+            vertices: list[Vector2] = poly.vertices
 
 
             matches: list[Vector2] = []
@@ -135,9 +156,9 @@ class ViewHome(ViewManager):
             # First, wee need to collect all vertex and check if there is a match. That's because
             # we need to know whether the user is still draggin the same vertex around. Else if we have a match
             # the new match found is the new vertex.
-            for vertex_index, vertex in enumerate(poly):
+            for vertex_index, vertex in enumerate(vertices):
 
-                self.write_vertex_coords(vertex)
+                poly.write_vertex_coords(vertex)
 
                 margin, current = self._get_point_detection_margin(poly_index, vertex_index)
 
@@ -147,13 +168,13 @@ class ViewHome(ViewManager):
                     if current:  # if the current object then we can just exit the loop
                         matches_previous_polygon = Vector2(poly_index, vertex_index)
                         break
-
             # Check if the user is near the center of the polygon
-            is_it = self.is_near_poly_centroid(poly_index, mouse_current, centroid)
-            if is_it:
-                hooked = True
-                continue
-            hooked = self.highlight_polygon_vertex(matches_previous_polygon, matches)
+            if not hooked:
+                is_it = self.is_near_poly_centroid(poly_index, mouse_current, centroid)
+                if is_it:
+                    hooked = True
+                    continue
+                hooked = self.highlight_polygon_vertex(matches_previous_polygon, matches)
 
         return hooked
 
@@ -174,7 +195,7 @@ class ViewHome(ViewManager):
             # Make a new draw
             half_w = self.app.win_width / 2
             half_h = self.app.win_height / 2
-            polygon = ShapeController.make_polygon(self.shape_new_vertex, 150, (half_w, half_h))
+            polygon = ShapeController.make_polygon(self.app, self.shape_new_vertex, 150, (half_w, half_h))
             self.polygons.append(polygon)
 
             # reset the new vertex counter
@@ -239,7 +260,7 @@ class ViewHome(ViewManager):
             else:
                 half_h = self.app.win_height / 2 + ((len(self.stars) * len(self.stars)) - 50)
 
-            self.stars.append(ShapeController.make_polygon(3, 150, (half_w, half_h)))
+            self.stars.append(ShapeController.make_polygon(self.app, 3, 150, (half_w, half_h)))
 
         def remove_star(event: dict):
             if 'MOUSE_LEFT' not in event:
@@ -277,6 +298,8 @@ class ViewHome(ViewManager):
 
         def _update():
 
+            # print(self.app.event_listener.events)
+
             # Update Gui Components
             components_gui.draw(self.app.background)
             components_gui.update()
@@ -301,6 +324,9 @@ class ViewHome(ViewManager):
             #   KEYBOARD / MOUSE CONTROL
             # ---------------------------------------------------------
             self.register_mouse_action(hooked)
+            self.register_keyboard_action(hooked)
+            if self.event_ctrl_l:
+                print(self.event_ctrl_l)
 
             # .............. drag center ............... #
             if self.current_figure_center is not None and self.current_figure_drag:
@@ -308,7 +334,7 @@ class ViewHome(ViewManager):
 
             # .............. drag vertex ............... #
             elif self.current_figure and self.current_figure_drag:
-                self.polygons[int(self.current_figure[0])][int(self.current_figure[1])] = Vector2(mouse_x, mouse_y)
+                ShapeController.polygon_move_vertex(self.polygons, self.current_figure, (mouse_x, mouse_y))
 
             # .............. central rotation ............... #
             if self.current_figure_center is not None and self.current_figure_wheel:
@@ -329,41 +355,19 @@ class ViewHome(ViewManager):
     # Utility functions
     # -----------------
 
-    def vertex_dot_focus(self, polygon: Vector2) -> None:
+    def vertex_dot_focus(self, polygon_index: Vector2) -> None:
         """Focus a Vertex, make it in a red dot
 
-        :param polygon:
+        :param polygon_index:
         :return:
         """
         try:
-            vertex = self.polygons[int(polygon.x)][int(polygon.y)]
+            polygon: Polygon = self.polygons[int(polygon_index.x)]
         except IndexError as err:
             print(str(err))
             return
-        pygame.draw.circle(self.app.background, (255, 0, 0),  # draw red dot around vertex
-                           Vector2(vertex[0], vertex[1]), 5)
-        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
-
-    def polygon_draw(self, poly: list, centroid: Vector2):
-        """ Draws a polygon and its center dot (centroid / barycenter)
-
-        :param poly:
-        :param centroid:
-        :return:
-        """
-        pygame.draw.circle(self.app.background, (79, 0, 153),  # draw red dot around vertex
-                           Vector2(centroid.x, centroid.y), 5)
-        self.write_vertex_coords(centroid)
-        pygame.draw.polygon(self.app.background, pygame.Color("green"), poly, width=2)
-
-    def write_vertex_coords(self, vertex: Vector2):
-        """Write the coordinates of a particualr vertex"""
-        # write vertex coordinates into the vertex
-        about_text1 = f"{round(vertex.x, 2)}-{round(vertex.y, 2)}"
-        font_img = self.app.font_small.render(about_text1, True, (255, 255, 255))
-        self.app.background.blit(font_img,
-                                 Vector2(vertex.x + 5, vertex.y + 5))
-
+        else:
+            polygon.vertex_focus(int(polygon_index.y))
 
     def _get_point_detection_margin(self, poly_index: int, vertex_index: int) -> tuple:
         """Detects the margin by witch a point is sensible to a mouse detection when is near
