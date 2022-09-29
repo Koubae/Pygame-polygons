@@ -36,6 +36,7 @@ class Slider:
         Get the current slide value
         :return: int
         """
+
         pos = int(self.rad + self.p * self.pwidth)
 
         value: Optional[int] = None
@@ -57,13 +58,28 @@ class Slider:
         self.slide_value = value
         return value
 
+    def set_slider_value(self, value: int):
+        """set the slider to the given int value
+        TODO: fix me, how to set the initiali value of the slider ????
+        :param value:
+        :return:
+        """
+
+        # reverse the mapping (value are key and key ase value
+        slide_mapping_reversed = {v : k for k, v in self.slide_mapping.items()}
+        if value in slide_mapping_reversed:
+            key = slide_mapping_reversed[value]
+
     def update(self):
+        # TODO: fix me, we should be able to set self.p by a parameter so that
+        # when we open a particular value x, we can request and which level is currently the slider!
         moude_buttons = pygame.mouse.get_pressed()
         mouse_pos = pygame.mouse.get_pos()
         if moude_buttons[0] and self.rect.collidepoint(mouse_pos):
             self.p = (mouse_pos[0] - self.rect.left - self.rad) / self.pwidth
             self.p = (max(0, min(self.p, 1)))
-            print(self.p)
+
+
 
         self.get_slider_value()
 

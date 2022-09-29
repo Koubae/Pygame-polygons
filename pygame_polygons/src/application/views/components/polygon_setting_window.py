@@ -176,8 +176,8 @@ class PolygonSettingWindow(GuiComponent):
     def _clean_up(self, polygon:Polygon):
         super()._clean_up()
 
-        self.margin_width_slider =  Slider(0, 0, 150, 8)
-        self.margin_width_slider.slide_value = polygon.border_width
+        # TODO fixme currently the initial value of the slider cannot be set, it will alsway start from value 0
+        # self.margin_width_slider.set_slider_value(polygon.border_width)
 
         # reset custom color picker
         custom_color = self.cp.get_color(first_value=True)
