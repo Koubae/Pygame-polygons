@@ -89,7 +89,8 @@ class Polygon:
             Vector2(vertex[0], vertex[1]),
             self.DOT_CIRCLE_RADIUS
         )  # draw red dot around vertex
-        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
+        if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_SIZEALL:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_SIZEALL)
 
     def write_vertex_coords(self, vertex: Vector2):
         """Write the coordinates of a particualr vertex"""

@@ -1,5 +1,5 @@
 import pygame
-from typing import Optional
+from typing import Optional, Any
 from ...config.constants import MOUSE_BUTTON_MAP, MOUSE_WHEEL
 
 
@@ -8,6 +8,7 @@ class EventListener:
     def __init__(self, app):
         self.app = app
         self.events: dict = {}
+        self.element_hovered: Optional[Any] = None
 
     def events_new(self) -> None:
         """Clear the events container"""

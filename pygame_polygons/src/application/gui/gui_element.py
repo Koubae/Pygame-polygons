@@ -71,6 +71,7 @@ class GuiElement(pygame.sprite.Sprite):
         }
         self.mouse_pointer = pygame.SYSTEM_CURSOR_ARROW
         self.mouse_over: bool = False
+        self.mouse_just_leaved: bool = False
         self.mouse_action: str = "NO_ACTION"
         self.element_clicked: bool = False
         self.element_clicked_timer: int = 0
@@ -159,14 +160,21 @@ class GuiElement(pygame.sprite.Sprite):
     def _register_mouse_hover(self) -> str:
         mouse_leaved = self._is_mouse_leave()
         mouse_entered = False
+        some_element_is_hovered: GuiElement = self.app.event_listener.element_hovered
         if not mouse_leaved:
             mouse_entered = self._is_mouse_enter()
+
         if mouse_leaved:
             self.mouse_action = "MOUSE_LEAVED"
+
         elif mouse_entered:
             self.mouse_action = "MOUSE_ENTERED"
+            if not some_element_is_hovered:
+                self.app.event_listener.element_hovered = self
         else:
             self.mouse_action = "MOUSE_LEAVED"
+            if some_element_is_hovered is self:
+                self.app.event_listener.element_hovered = None
         return self.mouse_action
 
     def _is_mouse_leave(self) -> bool:
@@ -179,6 +187,7 @@ class GuiElement(pygame.sprite.Sprite):
             return False
 
         self.mouse_over = False
+        self.mouse_just_leaved = True
         return True
 
     def _is_mouse_enter(self) -> bool:
@@ -187,14 +196,18 @@ class GuiElement(pygame.sprite.Sprite):
         collision = self.rect.colliderect(mouse_collider)
         if not collision:
             return False
+
         self.mouse_over = True
         return True
 
     def _on_mouse_enter(self) -> None:
         """@ovverride"""
-        if self.mouse_action != "MOUSE_ENTERED":
+
+        if self.mouse_action != "MOUSE_ENTERED" or not self.mouse_over:
             return
-        pygame.mouse.set_cursor(self.mouse_pointer)
+
+        if pygame.mouse.get_cursor() != self.mouse_pointer:
+            pygame.mouse.set_cursor(self.mouse_pointer)
 
         events = self.events['mouse_enter']
         for event in events:
@@ -202,9 +215,12 @@ class GuiElement(pygame.sprite.Sprite):
 
     def _on_mouse_leave(self) -> None:
         """@ovverride"""
-        if self.mouse_action != "MOUSE_LEAVED":
+        if self.mouse_action != "MOUSE_LEAVED" or not self.mouse_just_leaved:
             return
-        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+        self.mouse_just_leaved = False
+        if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
         events = self.events['mouse_leave']
         for event in events:

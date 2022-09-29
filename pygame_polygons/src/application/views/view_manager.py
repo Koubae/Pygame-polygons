@@ -5,6 +5,8 @@ from ...app import App
 
 class ViewManager:
 
+    # @override_require
+    VIEW_MODES: tuple = ()
     def __init__(self, app: App):
         self.app: App = app
         self.close_view: bool = False
@@ -72,4 +74,5 @@ class ViewManager:
 
     def _reset_view(self):
         """Perform clean up of the view"""
-        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+        if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)

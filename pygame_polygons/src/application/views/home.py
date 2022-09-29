@@ -4,6 +4,8 @@ from typing import Optional
 from ..gui import GuiPanel, GuiButton
 from .view_manager import ViewManager
 
+from .components import PolygonSettingWindow
+
 from ..services import ShapeController
 from ..shapes import Polygon
 
@@ -27,6 +29,9 @@ class ViewHome(ViewManager):
         self.current_selected_polygon: Optional[int] = None
         self.mode: str = self.VIEW_MODES[0]
 
+        # ------------- GUI components ------------- #
+        self.gui_polygon_settings: PolygonSettingWindow = PolygonSettingWindow(self.app, self)
+
         # ------------- INPUTS ------------- #
 
         # mouse
@@ -35,6 +40,8 @@ class ViewHome(ViewManager):
 
         # keyboard
         self.event_ctrl_l: Optional[str] = None
+
+
 
     def register_mouse_action(self, hooked: bool):
         """Register user mouse actions.
@@ -80,10 +87,13 @@ class ViewHome(ViewManager):
 
     def mouse_reset_drag_and_pointer(self) -> None:
         """Resets Mouse drag event actions and set default mouse pointer"""
-        if self.mode == 'polygon_selecting':
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        else:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+        if not self.app.event_listener.element_hovered:
+            if self.mode == 'polygon_selecting':
+                if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_HAND:
+                    pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+            else:
+                if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_ARROW:
+                    pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
         self.mouse_reset_drag()
 
     def mouse_reset_drag(self) -> None:
@@ -129,7 +139,8 @@ class ViewHome(ViewManager):
 
             self.current_figure = ()
             self.current_figure_center = poly_index
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
+            if pygame.mouse.get_cursor() != pygame.SYSTEM_CURSOR_CROSSHAIR:
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
             return True
 
         return False
@@ -331,32 +342,7 @@ class ViewHome(ViewManager):
         # add child to panel
         panel_left.children_add(button_navigate_about)
 
-        # -------------------
-        # Polygon context window
-        # panel
-        polygon_settings_gui = pygame.sprite.Group()
-        polygon_settings_size = Vector2(500, 350)
-        polygon_settings_window = GuiPanel(Vector2(0, 0), polygon_settings_size, self.app, self.app.background, None, {
-            'background_color': (51, 206, 255, 55)
-        })
-        polygon_settings_gui.add(polygon_settings_window)
 
-        def close_settings_window(event: dict):
-            if 'MOUSE_LEFT' not in event:
-                return
-            self.mode = self.VIEW_MODES[0]
-            self.current_selected_polygon = None
-
-        btn_poly_setting_close_size: Vector2 = Vector2(35, 25)
-        btn_poly_setting_close = GuiButton("X", Vector2((polygon_settings_size.x - 50), 10),
-                                           btn_poly_setting_close_size,
-                                           self.app, polygon_settings_window.image, polygon_settings_window, {
-                                               'background_color': pygame.Color("grey"),
-                                               'border_color': pygame.Color("grey")
-                                           })
-        btn_poly_setting_close.add_event_listener("click", close_settings_window)
-        # add child to panel
-        polygon_settings_window.children_add(btn_poly_setting_close)
 
         def _update():
 
@@ -379,31 +365,15 @@ class ViewHome(ViewManager):
                 if not polygon:
                     self.keyboard_reset_selected_polygon()
                 else:
-                    centroid = polygon.centroid
-                    # now we need to determine the position of the center of the polygon, Is it in the
-                    # we devide the screen in 4 (TOP-LEFT, TOP-RIGHT, BOTTOM-LEFT, BOTTOM-RIGHT)
-                    # add set to opposite direction
-                    # now, we make the position of the window setting the oppposite of the selected coordinates
-                    setting_window_position: Optional[Vector2] = self.app.get_window_opposite_position(centroid,
-                                                                                                       polygon_settings_size)
-                    if setting_window_position:
-                        # move context polygon ssetting window
-                        polygon_settings_window.move_gui_into(setting_window_position)
-                        btn_poly_setting_close.move_gui_into(Vector2(
-                            polygon_settings_size.x + (
-                                    abs(setting_window_position.x) - (abs(btn_poly_setting_close_size.x) * 2)),
-                            abs(btn_poly_setting_close_size.y + setting_window_position.y)
-                        ))
-                        # Update Gui Components
-                        polygon_settings_gui.draw(self.app.background)
-                        polygon_settings_gui.update()
+                    self.gui_polygon_settings.render(polygon.centroid, polygon)
+
 
             # ---------------------------------------------------------
             # SHAPES
             # ---------------------------------------------------------
             if self.mode == 'polygon_selected' and self.current_selected_polygon is not None:
                 hooked: bool = bool(
-                    self._render_polygon(self.current_selected_polygon, mouse_current, False, is_selected=True))
+                    self._render_polygon(self.current_selected_polygon, mouse_current, None, is_selected=True))
             else:
                 hooked: bool = self._render_polygons(mouse_current)
 
