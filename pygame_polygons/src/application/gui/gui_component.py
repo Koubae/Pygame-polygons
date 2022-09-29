@@ -115,7 +115,8 @@ class GuiComponent:
         self.btn_window_close.move_gui_into(self.btn_window_close_position)
 
     def close_component(self, event: dict) -> None:
+        """Closes / Resets a component """
         if 'MOUSE_LEFT' not in event:
             return
         self.view.mode = self.view.VIEW_MODES[0]
-        self.view.current_selected_polygon = None
+        self._clean_up()

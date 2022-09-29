@@ -1,8 +1,6 @@
-import pygame
-import math
 from pygame.math import Vector2
 from typing import Optional
-
+import traceback
 from ...shapes import Polygon
 from ....application.gui import GuiButton, GuiComponent
 from .color_picker import ColorPicker
@@ -179,8 +177,8 @@ class PolygonSettingWindow(GuiComponent):
         :return:
         """
         super()._pre_render(*args, **kwargs)
-        if polygon is not self.polygon_current:
-            self._clean_up(polygon)
+        if self.polygon_current and polygon is not self.polygon_current:
+            self._clean_up()
         self.polygon_current = polygon
 
         # ----------------------------
@@ -238,8 +236,10 @@ class PolygonSettingWindow(GuiComponent):
         self.btn_remove_all.move_gui_into(Vector2(self.window_position.x + 50, self.window_position.y + 155))
         self.btn_reset.move_gui_into(Vector2(self.window_position.x + 50, self.window_position.y + 185))
 
-    def _clean_up(self, polygon: Polygon):
+    def _clean_up(self, *args, **kwargs):
         super()._clean_up()
+        self.polygon_current = None
+        self.view.current_selected_polygon = None
 
         # TODO fixme currently the initial value of the slider cannot be set, it will alsway start from value 0
         # self.margin_width_slider.set_slider_value(polygon.border_width)
@@ -281,9 +281,11 @@ class PolygonSettingWindow(GuiComponent):
         self.cp.draw(self.screen)
 
     def color_picker_set_mode(self, _: dict, color_mode: str, *__, **___) -> None:
+        """Set the picker color mode"""
         self.color_picker_mode = color_mode
 
     def change_polygon_color(self, _: dict, color: tuple, *__, **___) -> None:
+        """Change the polygon background color or border color, depending on the current mode"""
         if not self.polygon_current:
             return
 
@@ -311,6 +313,9 @@ class PolygonSettingWindow(GuiComponent):
     # Shape Settings
 
     def vertex_add(self, event: dict, *_, **__):
+        """Adds one vertex
+            TODO: User should be able ALSO to add a vertex at desired position (meaning at index i, y ...)
+        """
         if 'MOUSE_LEFT' not in event:
             return
 
@@ -344,16 +349,19 @@ class PolygonSettingWindow(GuiComponent):
                 polygon.vertices_added.append((add_vertex_in, vertices[add_vertex_in]))
             except IndexError as err:
                 print(err)
+                traceback.print_exc()
 
         vertices_current = polygon.vertices
         try:
             vertices_current.insert(add_vertex_in, vertices[add_vertex_in])
         except IndexError as err:
             print(err)
+            traceback.print_exc()
 
         polygon.vertices = vertices_current
 
     def vertex_remove(self, event: dict, *_, **__):
+        """Removes latest added vertix"""
         if 'MOUSE_LEFT' not in event:
             return
         polygon: Polygon = self.polygon_current
@@ -369,6 +377,7 @@ class PolygonSettingWindow(GuiComponent):
         polygon.vertices = polygon_vertices
 
     def vertex_remove_all(self, event: dict, *_, **__):
+        """Remove all added vertices to the polygon however the original vertices x,y position won't change"""
         if 'MOUSE_LEFT' not in event:
             return
 
@@ -386,6 +395,7 @@ class PolygonSettingWindow(GuiComponent):
         polygon.vertices = polygon_vertices
 
     def vertex_reset(self, event: dict, *_, **__):
+        """Reset the current Polygon to its initial values"""
         if 'MOUSE_LEFT' not in event:
             return
         polygon: Polygon = self.polygon_current
