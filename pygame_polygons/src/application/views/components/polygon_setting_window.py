@@ -1,4 +1,5 @@
 import pygame
+import math
 from pygame.math import Vector2
 from typing import Optional
 
@@ -38,7 +39,6 @@ class PolygonSettingWindow(GuiComponent):
             }
         )
         self.gui_group.add(self.color_picker_btn_background)
-        self.window.children_add(self.color_picker_btn_background)
         self.color_picker_btn_background.add_event_listener("click", self.color_picker_set_mode,
                                                             self.color_picker_modes[0])
 
@@ -55,7 +55,6 @@ class PolygonSettingWindow(GuiComponent):
             }
         )
         self.gui_group.add(self.color_picker_btn_border)
-        self.window.children_add(self.color_picker_btn_border)
         self.color_picker_btn_border.add_event_listener("click", self.color_picker_set_mode, self.color_picker_modes[1])
 
         self.color_picker_size: Vector2 = Vector2(50, 50)
@@ -73,7 +72,6 @@ class PolygonSettingWindow(GuiComponent):
 
         )
         self.gui_group.add(self.color_picker)
-        self.window.children_add(self.color_picker)
 
         self.cp: ColorPicker = ColorPicker(0, 0, 150, 12)
 
@@ -100,12 +98,39 @@ class PolygonSettingWindow(GuiComponent):
             )
 
             self.gui_group.add(btn)
-            self.window.children_add(btn)
             btn.add_event_listener("click", self.change_polygon_color, rgb)
 
             self.color_picker_colors.append((btn, rgb))
 
         self.margin_width_slider: Slider = Slider(0, 0, 150, 8)
+
+        # ----------------------------
+        # Shape Settings
+
+        self.btn_vertex: Vector2 = Vector2(25, 25)
+        self.btn_vertex_add: GuiButton = GuiButton(
+            "+",
+            Vector2(25, 50),
+            self.btn_vertex,
+            self.app,
+            self.app.background,
+            self.window,
+
+        )
+        self.gui_group.add(self.btn_vertex_add)
+        self.btn_vertex_add.add_event_listener("click", self.vertex_add)
+
+        self.btn_vertex_remove: GuiButton = GuiButton(
+            "-",
+            Vector2(25, 50),
+            self.btn_vertex,
+            self.app,
+            self.app.background,
+            self.window,
+
+        )
+        self.gui_group.add(self.btn_vertex_remove)
+        self.btn_vertex_remove.add_event_listener("click", self.vertex_remove)
 
     def _render(self):
         super()._render()
@@ -125,7 +150,6 @@ class PolygonSettingWindow(GuiComponent):
         if polygon is not self.polygon_current:
             self._clean_up(polygon)
         self.polygon_current = polygon
-
 
         # ----------------------------
         # Color Settings
@@ -173,7 +197,13 @@ class PolygonSettingWindow(GuiComponent):
                 )
             )
 
-    def _clean_up(self, polygon:Polygon):
+        # ----------------------------
+        # Shape Settings
+
+        self.btn_vertex_add.move_gui_into(Vector2(self.window_position.x + 50, self.window_position.y + 120))
+        self.btn_vertex_remove.move_gui_into(Vector2(self.window_position.x + 80, self.window_position.y + 120))
+
+    def _clean_up(self, polygon: Polygon):
         super()._clean_up()
 
         # TODO fixme currently the initial value of the slider cannot be set, it will alsway start from value 0
@@ -198,7 +228,6 @@ class PolygonSettingWindow(GuiComponent):
         self.color_picker_btn_background.background_color_default = self.DEFAULT_WINDOW_BACKGROUND_COLOR
         self.color_picker_btn_background.change_text_color((125, 125, 125))
 
-
     # ---------------------
     # Settings methods
     # ---------------------
@@ -215,6 +244,7 @@ class PolygonSettingWindow(GuiComponent):
         self.cp.image.get_rect(topleft=cp_pos)
         self.cp.update()
         self.cp.draw(self.screen)
+
     def color_picker_set_mode(self, _: dict, color_mode: str, *__, **___) -> None:
         self.color_picker_mode = color_mode
 
@@ -241,3 +271,65 @@ class PolygonSettingWindow(GuiComponent):
         self.margin_width_slider.image.get_rect(topleft=pos)
         self.margin_width_slider.update()
         self.margin_width_slider.draw(self.screen)
+
+    # ----------------------------
+    # Shape Settings
+
+    def vertex_add(self, event: dict, *_, **__):
+        if 'MOUSE_LEFT' not in event:
+            return
+
+        # TODO: FIXME there must ba a mathematical formula to add and calcualte a new vertex in a polygon.
+        # Currenty it works BUT when the len of vertices is inferior to the index of the next vertix, is skippin a possition
+        # of the new vertx in a wrong place. see tag # FIXME_IS_BROKEN:( where the code does not work!
+
+        polygon: Polygon = self.polygon_current
+
+        # Increase the vertices count and get new vertices
+        polygon.vertex_count += 1
+        vertices: list[Vector2] = Polygon.draw_regular_polygon(polygon.vertex_count, polygon.radius, polygon.centroid)
+
+        # now we need to determine the new vertex position
+        vertices_added_current = polygon.vertices_added
+        vertices_added_total = len(vertices_added_current)
+        if not vertices_added_total:
+            add_vertex_in = 1
+            polygon.vertices_added = [(1, vertices[0])]
+        else:
+            get_latest_added_vertex = vertices_added_current[-1]
+            latest_index = get_latest_added_vertex[0]
+
+            add_vertex_in = (latest_index + 2)
+            if add_vertex_in == len(vertices) - 2:
+                add_vertex_in = len(vertices) -1
+            elif add_vertex_in >= len(vertices) -1 : # FIXME_IS_BROKEN:(
+                add_vertex_in = 1
+
+            try:
+                polygon.vertices_added.append((add_vertex_in, vertices[add_vertex_in]))
+            except IndexError as err:
+                print(err)
+
+        vertices_current = polygon.vertices
+        try:
+            vertices_current.insert(add_vertex_in, vertices[add_vertex_in])
+        except IndexError as err:
+            print(err)
+
+        polygon.vertices = vertices_current
+
+    def vertex_remove(self, event: dict, *_, **__):
+        if 'MOUSE_LEFT' not in event:
+            return
+        polygon: Polygon = self.polygon_current
+        if polygon.vertex_count == 3 or not polygon.vertices_added:
+            return
+        polygon.vertex_count -= 1
+        polygon_vertices = polygon.vertices
+
+        vertices_added_current = polygon.vertices_added
+        get_latest_added_vertex = vertices_added_current.pop()
+        latest_index = get_latest_added_vertex[0]
+        polygon_vertices.pop(latest_index)  # remove last inserted vertex
+
+        polygon.vertices = polygon_vertices

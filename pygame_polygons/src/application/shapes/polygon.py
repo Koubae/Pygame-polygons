@@ -28,12 +28,15 @@ class Polygon:
     def __init__(self, app, vertex_count: int, radius: int, position: Vector2):
         self.app = app
         self.screen: pygame.Surface = self.app.background
-        self.vertex_count: int = 3
-        self.radius: int
+        self.vertex_count: int = vertex_count
+        self.radius: int = radius
         self.position_initial: Vector2
 
         self._vertices: list[Vector2] = Polygon.draw_regular_polygon(vertex_count, radius, position)
         self._centroid: Vector2 = Polygon.get_polygon_centroid(self.vertices)
+
+        self._vertices_original: list[Vector2] = self._vertices # old values of the original polygon
+        self.vertices_added: list[tuple[int, Vector2]] = []
 
         self.border_color: tuple = self.TERMINAL_COLORS[self.DEFAULT_TERMINAL_COLORS[random.randint(0, len(self.DEFAULT_TERMINAL_COLORS) - 1)]]
         self.background_color: Optional[tuple] = None
