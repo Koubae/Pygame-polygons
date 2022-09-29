@@ -5,7 +5,7 @@ from pygame.math import Vector2
 import random
 
 class Polygon:
-    BORDER_WIDTH: int = 2
+    BORDER_WIDTH: int = 1
     DOT_CIRCLE_RADIUS: int = 5
 
     TEXT_COLOR: tuple[int, int, int] = (255, 255, 255)
@@ -37,6 +37,8 @@ class Polygon:
 
         self.border_color: tuple = self.TERMINAL_COLORS[self.DEFAULT_TERMINAL_COLORS[random.randint(0, len(self.DEFAULT_TERMINAL_COLORS) - 1)]]
         self.background_color: Optional[tuple] = None
+
+        self.border_width: int = self.BORDER_WIDTH
 
     @property
     def vertices(self) -> list[Vector2]:
@@ -72,9 +74,9 @@ class Polygon:
                 background_color = tuple([*self.background_color, 55])
 
             pygame.draw.polygon(self.screen, background_color, self.vertices)
-            pygame.draw.polygon(self.screen, self.border_color, self.vertices, width=self.BORDER_WIDTH+2)
+            pygame.draw.polygon(self.screen, self.border_color, self.vertices, width=self.border_width+2)
         else:
-            pygame.draw.polygon(self.screen, self.border_color, self.vertices, width=self.BORDER_WIDTH)
+            pygame.draw.polygon(self.screen, self.border_color, self.vertices, width=self.border_width)
         pygame.draw.circle(
             self.screen,
             self.CENTROID_DOT_COLOR,

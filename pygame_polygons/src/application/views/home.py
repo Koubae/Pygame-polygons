@@ -41,8 +41,6 @@ class ViewHome(ViewManager):
         # keyboard
         self.event_ctrl_l: Optional[str] = None
 
-
-
     def register_mouse_action(self, hooked: bool):
         """Register user mouse actions.
         If hooked is True, that means that an object is currenly performing an action

@@ -1,11 +1,12 @@
+from typing import Optional
 import pygame
 
-class ColorPicker:
-    """Color Picker Bar
-        @credit:
-            - StackOverflow
-            - User @Rabbid76 https://stackoverflow.com/users/5577765/rabbid76
-            - Answer: https://stackoverflow.com/a/73518042/13903942
+
+class Slider:
+    """Component representation of a range slider
+        For webDev!!  is like a input range <input type="range" />
+            -> https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/range
+
     """
 
     def __init__(self, x, y, w, h):
@@ -20,43 +21,41 @@ class ColorPicker:
             # because is tremendously ugly!
             self.image.fill((255, 255, 255))
 
-        self.current_color = None
-        self.c_m = {}
+        color = pygame.Color("white")
+
+        self.slide_value: int = 1
+        self.slide_mapping: dict = {}
         for i in range(self.pwidth):
-            color = pygame.Color(0)
-            color.hsla = (int(360 * i / self.pwidth), 100, 50, 100)
             width = i + self.rad
-            self.c_m[width] = color
+            self.slide_mapping[width] = i
             pygame.draw.rect(self.image, color, (width, 2, 1, h - 5))
         self.p = 0
 
-    def get_color(self, first_value: bool = False):
+    def get_slider_value(self) -> int:
         """
-        Get the current picker Color
-        :return:
+        Get the current slide value
+        :return: int
         """
-        if first_value:
-            self.current_color = list(self.c_m.values())[0]
-            return self.current_color
         pos = int(self.rad + self.p * self.pwidth)
 
-        color = None
-        total_colors = len(self.c_m)
+        value: Optional[int] = None
+        total_values = len(self.slide_mapping)
         count = 0
-        while count < total_colors:
+        while count < total_values:
             try:
-                color = self.c_m[pos]
-                if color:
+                value = self.slide_mapping[pos]
+                if value:
                     break
             except KeyError:
                 pass
 
             count += 1
             pos += 1
-        if not color:
-            color = pygame.Color(0)
-        self.current_color = color
-        return color
+        if value is None:  # grap last value
+            value = list(self.slide_mapping)[-1]
+        value = max(1, value)
+        self.slide_value = value
+        return value
 
     def update(self):
         moude_buttons = pygame.mouse.get_pressed()
@@ -64,8 +63,11 @@ class ColorPicker:
         if moude_buttons[0] and self.rect.collidepoint(mouse_pos):
             self.p = (mouse_pos[0] - self.rect.left - self.rad) / self.pwidth
             self.p = (max(0, min(self.p, 1)))
+            print(self.p)
+
+        self.get_slider_value()
 
     def draw(self, surf):
         surf.blit(self.image, self.rect)
         center = self.rect.left + self.rad + self.p * self.pwidth, self.rect.centery
-        pygame.draw.circle(surf, self.get_color(), center, self.rect.height // 2)
+        pygame.draw.circle(surf, pygame.Color("black"), center, self.rect.height // 2)

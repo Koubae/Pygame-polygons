@@ -82,6 +82,13 @@ class GuiComponent:
         """
         pass
 
+    def _clean_up(self, *args, **kwargs):
+        """@mustovverride
+            Perform various clean-ups of the component
+        """
+        pass
+
+
     def _calculate_new_component_position(self, context_center: Vector2) -> None:
 
         # now we need to determine the position of the center of the polygon, Is it in the

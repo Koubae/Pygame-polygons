@@ -5,6 +5,8 @@ from typing import Optional
 from ...shapes import Polygon
 from ....application.gui import GuiButton, GuiComponent
 from .color_picker import ColorPicker
+from .slider import Slider
+
 
 class PolygonSettingWindow(GuiComponent):
 
@@ -103,17 +105,13 @@ class PolygonSettingWindow(GuiComponent):
 
             self.color_picker_colors.append((btn, rgb))
 
+        self.margin_width_slider: Slider = Slider(0, 0, 150, 8)
+
     def _render(self):
         super()._render()
 
-        cp_pos: Vector2 = Vector2(
-            Vector2(self.window_position.x + 125 + 90, self.window_position.y + 45)
-        )
-
-        self.cp.rect.topleft = cp_pos
-        self.cp.image.get_rect(topleft=cp_pos)
-        self.cp.update()
-        self.cp.draw(self.screen)
+        self._render_color_picker()
+        self._render_margin_width_slider()
 
     def _pre_render(self, polygon: Polygon, *args, **kwargs) -> None:
         """@ovverride
@@ -124,11 +122,15 @@ class PolygonSettingWindow(GuiComponent):
         :return:
         """
         super()._pre_render(*args, **kwargs)
+        if polygon is not self.polygon_current:
+            self._clean_up(polygon)
         self.polygon_current = polygon
 
 
         # ----------------------------
         # Color Settings
+
+        polygon.border_width = self.margin_width_slider.slide_value
 
         custom_color = self.cp.current_color
         custom_color_btn = self.color_picker_colors[0][0]
@@ -171,12 +173,48 @@ class PolygonSettingWindow(GuiComponent):
                 )
             )
 
+    def _clean_up(self, polygon:Polygon):
+        super()._clean_up()
+
+        self.margin_width_slider =  Slider(0, 0, 150, 8)
+        self.margin_width_slider.slide_value = polygon.border_width
+
+        # reset custom color picker
+        custom_color = self.cp.get_color(first_value=True)
+        custom_color_btn = self.color_picker_colors[0][0]
+        custom_color_btn.remove_event_listeners("click")
+        custom_color_btn.add_event_listener("click", self.change_polygon_color, custom_color)
+        custom_color_btn.background_color_default = [custom_color[0], custom_color[1], custom_color[2], 55]
+        custom_color_btn.border_color_default = custom_color
+
+        # reset default color pickers
+        self.color_picker_mode: str = self.color_picker_modes[1]
+        self.color_picker.background_color_default = (255, 255, 0)
+        self.color_picker.border_color_default = (255, 255, 0)
+
+        self.color_picker_btn_border.background_color_default = (255, 255, 255)
+        self.color_picker_btn_border.change_text_color((0, 0, 0))
+
+        self.color_picker_btn_background.background_color_default = self.DEFAULT_WINDOW_BACKGROUND_COLOR
+        self.color_picker_btn_background.change_text_color((125, 125, 125))
+
+
     # ---------------------
     # Settings methods
     # ---------------------
 
     # ----------------------------
     # Color Settings
+
+    def _render_color_picker(self) -> None:
+        """Render to Component window the Color picker"""
+        cp_pos: Vector2 = Vector2(
+            Vector2(self.window_position.x + 125 + 90, self.window_position.y + 45)
+        )
+        self.cp.rect.topleft = cp_pos
+        self.cp.image.get_rect(topleft=cp_pos)
+        self.cp.update()
+        self.cp.draw(self.screen)
     def color_picker_set_mode(self, _: dict, color_mode: str, *__, **___) -> None:
         self.color_picker_mode = color_mode
 
@@ -193,3 +231,13 @@ class PolygonSettingWindow(GuiComponent):
                 color = self.color_picker_colors[0][1]  # reset the color
 
             self.polygon_current.border_color = color
+
+    def _render_margin_width_slider(self) -> None:
+        """Render to Component window the Color picker"""
+        pos: Vector2 = Vector2(
+            Vector2(self.window_position.x + 125 + 90, self.window_position.y + 65)
+        )
+        self.margin_width_slider.rect.topleft = pos
+        self.margin_width_slider.image.get_rect(topleft=pos)
+        self.margin_width_slider.update()
+        self.margin_width_slider.draw(self.screen)
