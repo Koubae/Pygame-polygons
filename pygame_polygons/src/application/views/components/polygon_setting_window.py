@@ -83,14 +83,15 @@ class PolygonSettingWindow(GuiComponent):
         }
         for color, rgb in colors.items():
             # Create a button
-            btn_size: Vector2 = Vector2(75, 15)
+            btn_size: Vector2 = Vector2(75, 20)
             btn: GuiButton = GuiButton(
-                color,
+                color.replace('_', ' ').capitalize(),
                 Vector2((self.window_size.x - 50), 10),
                 btn_size,
                 self.app,
                 self.window.image,
-                self.window, {
+                self.window,
+                {
                     'background_color': (rgb[0], rgb[1], rgb[2], 55),
                     'border_color': rgb,
                     'font_color': rgb
@@ -131,6 +132,37 @@ class PolygonSettingWindow(GuiComponent):
         )
         self.gui_group.add(self.btn_vertex_remove)
         self.btn_vertex_remove.add_event_listener("click", self.vertex_remove)
+
+        self.btn_remove_all_size: Vector2 = Vector2(75, 25)
+        self.btn_remove_all: GuiButton = GuiButton(
+            "-- Vertex",
+            Vector2(25, 50),
+            self.btn_remove_all_size,
+            self.app,
+            self.app.background,
+            self.window,
+
+        )
+        self.gui_group.add(self.btn_remove_all)
+        self.btn_remove_all.add_event_listener("click", self.vertex_remove_all)
+
+        self.btn_reset_size: Vector2 = Vector2(75, 25)
+        self.btn_reset: GuiButton = GuiButton(
+            "Reset",
+            Vector2(25, 50),
+            self.btn_reset_size,
+            self.app,
+            self.app.background,
+            self.window,
+            {
+                'background_color': (255, 25, 0, 85),
+                'border_color': (255, 25, 0),
+                'font_color': (255, 255, 255)
+            }
+
+        )
+        self.gui_group.add(self.btn_reset)
+        self.btn_reset.add_event_listener("click", self.vertex_reset)
 
     def _render(self):
         super()._render()
@@ -202,6 +234,9 @@ class PolygonSettingWindow(GuiComponent):
 
         self.btn_vertex_add.move_gui_into(Vector2(self.window_position.x + 50, self.window_position.y + 120))
         self.btn_vertex_remove.move_gui_into(Vector2(self.window_position.x + 80, self.window_position.y + 120))
+
+        self.btn_remove_all.move_gui_into(Vector2(self.window_position.x + 50, self.window_position.y + 155))
+        self.btn_reset.move_gui_into(Vector2(self.window_position.x + 50, self.window_position.y + 185))
 
     def _clean_up(self, polygon: Polygon):
         super()._clean_up()
@@ -301,8 +336,8 @@ class PolygonSettingWindow(GuiComponent):
 
             add_vertex_in = (latest_index + 2)
             if add_vertex_in == len(vertices) - 2:
-                add_vertex_in = len(vertices) -1
-            elif add_vertex_in >= len(vertices) -1 : # FIXME_IS_BROKEN:(
+                add_vertex_in = len(vertices) - 1
+            elif add_vertex_in >= len(vertices) - 1:  # FIXME_IS_BROKEN:(
                 add_vertex_in = 1
 
             try:
@@ -331,5 +366,28 @@ class PolygonSettingWindow(GuiComponent):
         get_latest_added_vertex = vertices_added_current.pop()
         latest_index = get_latest_added_vertex[0]
         polygon_vertices.pop(latest_index)  # remove last inserted vertex
-
         polygon.vertices = polygon_vertices
+
+    def vertex_remove_all(self, event: dict, *_, **__):
+        if 'MOUSE_LEFT' not in event:
+            return
+
+        polygon: Polygon = self.polygon_current
+        if polygon.vertex_count == 3 or not polygon.vertices_added:
+            return
+        polygon.vertex_count -= len(polygon.vertices_added)
+        polygon_vertices = polygon.vertices
+
+        for vertex_added in reversed(polygon.vertices_added):
+            index = vertex_added[0]
+            polygon_vertices.pop(index)  # remove last inserted vertex
+
+        polygon.vertices_added.clear()
+        polygon.vertices = polygon_vertices
+
+    def vertex_reset(self, event: dict, *_, **__):
+        if 'MOUSE_LEFT' not in event:
+            return
+        polygon: Polygon = self.polygon_current
+        polygon.vertices_reset()
+

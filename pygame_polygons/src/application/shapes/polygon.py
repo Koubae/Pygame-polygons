@@ -1,4 +1,5 @@
 import math
+import copy
 from typing import Union, Optional
 import pygame
 from pygame.math import Vector2
@@ -35,7 +36,7 @@ class Polygon:
         self._vertices: list[Vector2] = Polygon.draw_regular_polygon(vertex_count, radius, position)
         self._centroid: Vector2 = Polygon.get_polygon_centroid(self.vertices)
 
-        self._vertices_original: list[Vector2] = self._vertices # old values of the original polygon
+        self._vertices_original: list[Vector2] = copy.deepcopy(self._vertices) # old values of the original polygon
         self.vertices_added: list[tuple[int, Vector2]] = []
 
         self.border_color: tuple = self.TERMINAL_COLORS[self.DEFAULT_TERMINAL_COLORS[random.randint(0, len(self.DEFAULT_TERMINAL_COLORS) - 1)]]
@@ -52,6 +53,14 @@ class Polygon:
     def vertices(self, value: list[Vector2]) -> None:
         """Sets the vertices"""
         self._vertices = value
+
+    def vertices_reset(self):
+        """Resets the vertices at its initial value"""
+        self.vertices_added.clear()                  # remove all added verticex
+        self._vertices = copy.deepcopy(self._vertices_original) # reset vertices to its original
+        self.vertex_count = len(self.vertices)  # reset vertex count
+
+
 
     @property
     def centroid(self) -> Vector2:
