@@ -20,7 +20,7 @@ class ViewAbout(ViewManager):
         components_gui.add(div)
 
         # button
-        def view_home(event: dict):
+        def view_home(event: dict, *_, **__):
             if 'MOUSE_LEFT' not in event:
                 return
             self.app.view_current = "home"

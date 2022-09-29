@@ -235,7 +235,7 @@ class ViewHome(ViewManager):
         components_gui.add(panel_left)
 
         # button
-        def action(event: dict):
+        def action(event: dict, *_, **__):
             if 'MOUSE_LEFT' not in event:
                 return
             # Make a new draw
@@ -253,7 +253,7 @@ class ViewHome(ViewManager):
         # add child to panel
         panel_left.children_add(btn_new_shape)
 
-        def vertex_add(event: dict):
+        def vertex_add(event: dict, *_, **__):
             if 'MOUSE_LEFT' not in event:
                 return
 
@@ -261,7 +261,7 @@ class ViewHome(ViewManager):
             if self.shape_new_vertex > self.SHAPE_VERTEX_MAX:
                 self.shape_new_vertex = self.SHAPE_VERTEX_MAX
 
-        def vertex_remove(event: dict):
+        def vertex_remove(event: dict, *_, **__):
             if 'MOUSE_LEFT' not in event:
                 return
 
@@ -282,7 +282,7 @@ class ViewHome(ViewManager):
         # add child to panel
         panel_left.children_add(btn_vertex_add)
 
-        def screen_clear(event: dict):
+        def screen_clear(event: dict, *_, **__):
             if 'MOUSE_LEFT' not in event:
                 return
             self.polygons.clear()
@@ -297,7 +297,7 @@ class ViewHome(ViewManager):
 
         # btn_star
 
-        def make_star(event: dict):
+        def make_star(event: dict, *_, **__):
             if 'MOUSE_LEFT' not in event:
                 return
             half_w = self.app.win_width / 4 + (len(self.stars) * len(self.stars))
@@ -308,7 +308,7 @@ class ViewHome(ViewManager):
 
             self.stars.append(ShapeController.make_polygon(self.app, 3, 150, (half_w, half_h)))
 
-        def remove_star(event: dict):
+        def remove_star(event: dict, *_, **__):
             if 'MOUSE_LEFT' not in event:
                 return
             if self.stars:
@@ -327,7 +327,7 @@ class ViewHome(ViewManager):
         panel_left.children_add(btn_star_remove)
 
         # button button_navigate_about
-        def view_about(event: dict):
+        def view_about(event: dict, *_, **__):
             if 'MOUSE_LEFT' not in event:
                 return
             self.app.view_current = "about"

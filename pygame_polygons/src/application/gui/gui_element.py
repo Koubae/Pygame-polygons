@@ -138,7 +138,7 @@ class GuiElement(pygame.sprite.Sprite):
     # -----------------------
     # Events handlers
     # -----------------------
-    def add_event_listener(self, event: str, listener: callable) -> Any:
+    def add_event_listener(self, event: str, listener: callable, *args, **kwargs) -> Any:
         """Sets up a function that will be called whenever the specified event is delivered to the target.
 
         Directly insprited by Javascript wep api EventTarget.addEventListener
@@ -151,7 +151,10 @@ class GuiElement(pygame.sprite.Sprite):
         if event not in self.events:
             raise AttributeError(f'Event {event} not supported in events list {list(self.events.keys())}')
         # register the event
-        self.events[event].append(listener)
+        self.events[event].append((listener, args, kwargs))
+
+    def remove_event_listeners(self, event: str):
+        self.events[event].clear()
 
     # -----------------------
     # API Low
@@ -210,8 +213,8 @@ class GuiElement(pygame.sprite.Sprite):
             pygame.mouse.set_cursor(self.mouse_pointer)
 
         events = self.events['mouse_enter']
-        for event in events:
-            event()
+        for (event, args, kwargs) in events:
+            event(*args, **kwargs)
 
     def _on_mouse_leave(self) -> None:
         """@ovverride"""
@@ -223,8 +226,8 @@ class GuiElement(pygame.sprite.Sprite):
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
         events = self.events['mouse_leave']
-        for event in events:
-            event()
+        for (event, args, kwargs) in events:
+            event(*args, **kwargs)
 
     def _on_mouse_click(self) -> None:
         """@ovverride"""
@@ -237,5 +240,5 @@ class GuiElement(pygame.sprite.Sprite):
             return
 
         events = self.events['click']
-        for event in events:
-            event(event_click) # call callbacks
+        for (event, args, kwargs) in events:
+            event(event_click, *args, **kwargs) # call callbacks

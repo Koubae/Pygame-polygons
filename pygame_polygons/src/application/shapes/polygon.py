@@ -1,5 +1,5 @@
 import math
-from typing import Union
+from typing import Union, Optional
 import pygame
 from pygame.math import Vector2
 import random
@@ -36,7 +36,7 @@ class Polygon:
         self._centroid: Vector2 = Polygon.get_polygon_centroid(self.vertices)
 
         self.border_color: tuple = self.TERMINAL_COLORS[self.DEFAULT_TERMINAL_COLORS[random.randint(0, len(self.DEFAULT_TERMINAL_COLORS) - 1)]]
-        self.background_color: tuple = self.TERMINAL_COLORS[self.DEFAULT_TERMINAL_COLORS[random.randint(0, len(self.DEFAULT_TERMINAL_COLORS) - 1)]]
+        self.background_color: Optional[tuple] = None
 
     @property
     def vertices(self) -> list[Vector2]:
@@ -63,6 +63,18 @@ class Polygon:
 
         :return:
         """
+
+        if self.background_color:
+            # add always transparency
+            if len(self.background_color) == 4:
+                background_color = self.background_color
+            else:
+                background_color = tuple([*self.background_color, 55])
+
+            pygame.draw.polygon(self.screen, background_color, self.vertices)
+            pygame.draw.polygon(self.screen, self.border_color, self.vertices, width=self.BORDER_WIDTH+2)
+        else:
+            pygame.draw.polygon(self.screen, self.border_color, self.vertices, width=self.BORDER_WIDTH)
         pygame.draw.circle(
             self.screen,
             self.CENTROID_DOT_COLOR,
@@ -70,7 +82,6 @@ class Polygon:
             self.DOT_CIRCLE_RADIUS
         )  # draw dot around center
         self.write_vertex_coords(self.centroid)
-        pygame.draw.polygon(self.screen, self.border_color, self.vertices, width=self.BORDER_WIDTH)
 
     def vertex_focus(self, vertex_index: int) -> None:
         """Focus a Vertex, make it in a red dot

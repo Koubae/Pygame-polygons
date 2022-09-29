@@ -53,7 +53,7 @@ class App:
             self.win_flags = pygame.NOFRAME
 
         window = pygame.display.set_mode(self.win_size, self.win_flags, 32, display=self.DEFAULT_DISPLAY)
-        background = pygame.Surface(self.win_size)
+        background = pygame.Surface(self.win_size, pygame.SRCALPHA)
         return window, background
 
     def switch_off(self):

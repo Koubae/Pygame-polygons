@@ -33,10 +33,12 @@ class GuiButton(GuiPanel):
             self.border_width: int = "border_width" in self.settings and self.settings["border_width"] or setting_panel[
                 "border_width"]
 
+            self.font_color: tuple = "font_color" in self.settings and self.settings["font_color"] or self.app.font_gui_color
+
             self.register_default_element_values()  # re-register default values
 
         self.text: str = text
-        self.text_img = self.app.font_gui.render(self.text, True, self.app.font_gui_color)
+        self.text_img = self.app.font_gui.render(self.text, True, self.font_color)
 
         # events
         self.mouse_pointer = pygame.SYSTEM_CURSOR_HAND
@@ -101,4 +103,13 @@ class GuiButton(GuiPanel):
         self.background_color = self.background_color_default
         self.border_color = self.border_color_default
 
+
+    def change_text_color(self, color: tuple[int, int, int]) -> None:
+        """Changes the button font-color
+
+        :param color: tuple (rgb) color
+        :return:
+        """
+
+        self.text_img = self.app.font_gui.render(self.text, True, color)
 
