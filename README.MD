@@ -11,6 +11,13 @@ Pygame Polygons
 [![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
 
 
+A Pygame Application done to build more Pygame applications / games
+Basically I needed a tool that would easily make me able to draw shapes / Polygons on a Pygame screen and be able to
+quickly see the vertices x,y coordinates.
+
+Because you can also move the polygons around, this provide a good way to test and get move draw quick into a new
+Pygame project where drawing polygons is needed, because it shows you the coordinates on the screen.
+
 ### Github / Markdown Budget
 
 **Credit to [Naereen](https://github.com/Naereen/badges)**
