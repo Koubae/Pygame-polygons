@@ -1,0 +1,11 @@
+altgraph==0.17.3
+future==0.18.2
+numpy==1.23.3
+pefile==2022.5.30
+pygame==2.1.2
+pygame-gui==0.6.4
+pyinstaller==5.4.1
+pyinstaller-hooks-contrib==2022.10
+PyOpenGL==3.1.6
+python-i18n==0.3.9
+pywin32-ctypes==0.2.0

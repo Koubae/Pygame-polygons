@@ -1,3 +1,4 @@
+import os
 from pygame.math import Vector2
 from typing import Optional
 from .application.services.event_listener import EventListener
@@ -18,7 +19,7 @@ from .version import (
 
 
 class App:
-    DEFAULT_DISPLAY: int = 1
+    DEFAULT_DISPLAY: int = 0
 
     def __init__(self, app_name: str, app: dict, world: dict, ):
         # laod app info
@@ -76,12 +77,27 @@ class App:
 
     def create_app(self) -> tuple:
         pygame.display.set_caption(self.app_name)
+        pygame.event.set_allowed([
+            pygame.QUIT,
+            pygame.KEYDOWN,
+            pygame.KEYUP,
+            pygame.MOUSEBUTTONDOWN,
+            pygame.MOUSEBUTTONUP,
+            pygame.MOUSEWHEEL
+        ])
         # screen
         if self.screen_size == "large":
-            self.win_flags = pygame.NOFRAME
+            self.win_flags = pygame.NOFRAME | pygame.FULLSCREEN | pygame.DOUBLEBUF
 
         window = pygame.display.set_mode(self.win_size, self.win_flags, 32, display=self.DEFAULT_DISPLAY)
         background = pygame.Surface(self.win_size, pygame.SRCALPHA)
+
+        # load the icon
+        # app_icon = pygame.image.load(os.path.join(os.getcwd(), 'resources', 'icon.ico', )).convert()
+        # app_icon = pygame.transform.scale(app_icon, (32, 32))
+        # app_icon.set_colorkey((0, 0, 0))
+        # pygame.display.set_icon(app_icon)
+
         return window, background
 
     def switch_off(self):

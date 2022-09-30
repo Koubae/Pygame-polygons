@@ -14,7 +14,7 @@ class AppRunner:
 
         # pygame setup
         app = App(
-            "Drawings",
+            "Pygame Polygons",
             {
                 'clock': CLOCK,
                 'frames': FRAMES

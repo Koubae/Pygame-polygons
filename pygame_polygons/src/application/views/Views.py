@@ -15,9 +15,6 @@ class Views(ViewManager):
         about = ViewAbout(self.app)
 
         def _update():
-
-            print(self.app.view_current)
-
             if self.app.view_current == 'home':
                 home.game_beat()
             elif self.app.view_current == 'about':
