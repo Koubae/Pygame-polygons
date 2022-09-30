@@ -39,13 +39,16 @@ class GuiComponent:
         # Create close button of the component
 
         self.btn_window_close_size: Vector2 = Vector2(35, 25)
-        self.btn_window_close: GuiButton = GuiButton("X", Vector2((self.window_size.x - 50), 10),
-                                          self.btn_window_close_size,
-                                          self.app, self.window.image,
-                                          self.window, {
-                                              'background_color': self.DEFAULT_BTN_CLOSE_BACKGROUND_COLOR,
-                                              'border_color': self.DEFAULT_BTN_CLOSE_BORDER_COLOR
-                                          })
+        self.btn_window_close: GuiButton = GuiButton(
+            "X",
+                Vector2((self.window_size.x - 50), 10),
+          self.btn_window_close_size,
+          self.app, self.window.image,
+          self.window, {
+              'background_color': self.DEFAULT_BTN_CLOSE_BACKGROUND_COLOR,
+              'border_color': self.DEFAULT_BTN_CLOSE_BORDER_COLOR
+          }
+        )
         self.gui_group.add(self.btn_window_close)
         self.window.children_add(self.btn_window_close)
         self.btn_window_close.add_event_listener("click", self.close_component)

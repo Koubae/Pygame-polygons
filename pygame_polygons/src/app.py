@@ -4,6 +4,8 @@ from .application.services.event_listener import EventListener
 from .config.constants import *
 
 
+
+__version__ = "0.0.1"
 class App:
     DEFAULT_DISPLAY: int = 1
 
