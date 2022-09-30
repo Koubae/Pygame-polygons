@@ -25,22 +25,22 @@ The Apps Allows you do create polygons from 3 to infinite vertices, change their
 As I'm sure you know, a polygon can have from 3 to infinite vertices. So the smallest polygon we can create is a triange
 at 3 vertices, and is also the default value. In order to create a polygon, simply press the button **New Shape**
 
-![img_8.png](img_8.png)
+![img_8.png](docs/img_8.png)
 
 This, will create a new triangle at the center of the screen, at more the less its center.
 
 You can add/remove vertices with the **+**, **-** buttons just below the **New Shape** button.
 
-![img_9.png](img_9.png)
+![img_9.png](docs/img_9.png)
 
 The polygon is composed by the following
 
 * The specified lines (default green)
 * Vertex X,Y coordinates 
-![img_11.png](img_11.png)
+![img_11.png](docs/img_11.png)
 * Vertices Center/Barycenter/Centroid (in purple) and its X,Y coordinates
 
-![img_12.png](img_12.png)
+![img_12.png](docs/img_12.png)
 
 
 ### Rotate a Polygon
@@ -51,21 +51,21 @@ barycenter (purple dot) and then use the mouse's scroll.
 * Scroll UP: turns anti-clockwise
 * Scroll Down turns clockwise
 
-![img_10.png](img_10.png)
+![img_10.png](docs/img_10.png)
 
 ### Change shape of Polygon
 
 You can change the position of any vertex of a polygon, in order to do that, with the mouse pointer hover on top of a vertex
 until a red dot appears
 
-![img_13.png](img_13.png)
-![img_13.png](img_14.png)
+![img_13.png](docs/img_13.png)
+![img_13.png](docs/img_14.png)
 
 You can see the cursor changes to a 4 arrowed pointer, click the **left mouse** and drag the vertex at any point in the screen.
 
 There is no limit, so you can create any type of irregular shape, after all is like the _matrix_
 
-![img_15.png](img_15.png)
+![img_15.png](docs/img_15.png)
 
 ### Polygon settings
 
@@ -74,29 +74,29 @@ _NOTE:_ There is currently many missing features for the settings, right now are
 Hold **CRLT LEFT** and while holding, hover with the mouose pointer on top of the target polygon, the setting pane menu 
 will open automatically
 
-![img_16.png](img_16.png)
+![img_16.png](docs/img_16.png)
 
 You can change the background color or border color (select what to change by clicking the buttons) , there are some default 
 colors (which corresponds to some old terminal color, just for the fun of it, see this StackOverflow response [here](https://superuser.com/questions/361297/what-colour-is-the-dark-green-on-old-fashioned-green-screen-computer-displays))
 
 You can also change width of the border:
 
-![img_17.png](img_17.png)
+![img_17.png](docs/img_17.png)
 
 Increase / Remove Vertices (Experimental)
 
-![img_18.png](img_18.png)
+![img_18.png](docs/img_18.png)
 
 And the reset to initial Values
 
-![img_19.png](img_19.png)
+![img_19.png](docs/img_19.png)
 
 ### Clear the screen
 
 You can clear a screen by pressing the button **clear**, which will immediately destroy everything from the canvas.
 
-![img_6.png](img_6.png)
-![img_7.png](img_7.png)
+![img_6.png](docs/img_6.png)
+![img_7.png](docs/img_7.png)
 
 
 ### Commands
@@ -108,8 +108,8 @@ You can clear a screen by pressing the button **clear**, which will immediately 
   * UP: turns anti-clockwise
   * Down turns clockwise
 
-![img_1.png](img_1.png)
-![img_2.png](img_2.png)
+![img_1.png](docs/img_1.png)
+![img_2.png](docs/img_2.png)
 
 
 ### Make star
@@ -118,16 +118,16 @@ This is only a prototype and just to have some fun, however, it is an example of
 of 'early' / 'rudimental' implementation of **animations**. Basically by pressing the button **Make star**
 a 'star' is created and ir rotating at its center
 
-![img_3.png](img_3.png)
+![img_3.png](docs/img_3.png)
 
 But as you can see from the picture, is really just a 'triangle' that is rotating at 60 frames / second, giving the 
 impression to be an actual star
 
-![img_4.png](img_4.png)
+![img_4.png](docs/img_4.png)
 
 We can add as many start as we want and also remove it
 
-![img_5.png](img_5.png)
+![img_5.png](docs/img_5.png)
 
 
 ### Installation
@@ -144,7 +144,7 @@ The installation is done with PyInstaller, in order to use it, follow the instru
 2. Go Here -> https://github.com/upx/upx/releases/
 3. Download the UPX for your OS, in my case [https://github.com/upx/upx/releases/download/v3.96/upx-3.96-win64.zip](upx-3.96-win64.zip)
 
-![img.png](img.png)
+![img.png](docs/img.png)
 
 4. So in my case I installed in `D:\ups\upx-3.96-win64`
 5. Run the installer this way 
