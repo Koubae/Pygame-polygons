@@ -331,7 +331,7 @@ class ViewHome(ViewManager):
             self.app.view_current = "about"
             self.close_view = True
 
-        button_navigate_about = GuiButton("About", Vector2((panel_left_size.x / 2), self.app.win_height - 50), None,
+        button_navigate_about = GuiButton("About", Vector2((panel_left_size.x / 2), self.app.win_height - 70), None,
                                           self.app, panel_left.image, panel_left, {
                                               'background_color': pygame.Color("grey"),
                                               'border_color': pygame.Color("grey")
@@ -340,6 +340,7 @@ class ViewHome(ViewManager):
         # add child to panel
         panel_left.children_add(button_navigate_about)
 
+        app_version = self.app.font_small.render(f'{self.app.app_info["__app__"]}', True, (255, 255, 255))
 
 
         def _update():
@@ -357,6 +358,8 @@ class ViewHome(ViewManager):
             mouse_current = pygame.mouse.get_pos()
             mouse_x = mouse_current[0]
             mouse_y = mouse_current[1]
+
+            panel_left.image.blit(app_version, Vector2(15, self.app.win_height - 30))
 
             if self.mode == 'polygon_selected' and self.current_selected_polygon is not None:
                 polygon: Polygon = self.get_selected_polygon(self.current_selected_polygon)

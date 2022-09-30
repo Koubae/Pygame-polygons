@@ -2,14 +2,40 @@ from pygame.math import Vector2
 from typing import Optional
 from .application.services.event_listener import EventListener
 from .config.constants import *
+from .version import (
+    __version__,
+    __author__,
+    __website__,
+    __copyright__,
+    __credits__,
+    __license__,
+    __maintainer__,
+    __email__,
+    __emails__,
+    __status__,
+    __app__
+)
 
 
-
-__version__ = "0.0.1"
 class App:
     DEFAULT_DISPLAY: int = 1
 
     def __init__(self, app_name: str, app: dict, world: dict, ):
+        # laod app info
+        self.app_info: dict = {
+            "__version__": __version__,
+            "__author__": __author__,
+            "__website__": __website__,
+            "__copyright__": __copyright__,
+            "__credits__": __credits__,
+            "__license__": __license__,
+            "__maintainer__": __maintainer__,
+            "__email__": __email__,
+            "__emails__": __emails__,
+            "__status__": __status__,
+            "__app__": __app__,
+        }
+
         self.app_name: str = app_name
         self.run: bool = True
         # App data

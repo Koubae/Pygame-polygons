@@ -4,13 +4,13 @@ from pygame.math import Vector2
 from ..gui import GuiPanel, GuiButton
 from .view_manager import ViewManager
 
+
 class ViewAbout(ViewManager):
 
     def __init__(self, *args):
         super().__init__(*args)
 
     def view_logic(self):
-
         components_gui = pygame.sprite.Group()
         # panel
         div_size = Vector2((self.app.win_width - 250, self.app.win_height - 150))
@@ -31,11 +31,10 @@ class ViewAbout(ViewManager):
             self.app.view_current = "home"
             self.close_view = True
 
-
         btn_back_size: Vector2 = Vector2(120, 50)
         btn_back: GuiButton = GuiButton(
             "<-- Back to Home",
-            Vector2(250 , 120),
+            Vector2(250, 120),
             btn_back_size,
             self.app,
             div.image,
@@ -49,18 +48,33 @@ class ViewAbout(ViewManager):
         )
         btn_back.add_event_listener("click", view_home)
         components_gui.add(btn_back)
-        print(__version__)
+        app_info = self.app.app_info
+        about_text = f"""
+        A Pygame Application done to build more Pygame applications / games
+        Basically I needed a tool that would easily make me able to draw shapes / Polygons on a Pygame screen and be able to
+        quickly see the vertices x,y coordinates.
+        
+        Because you can also move the polygons around, this provide a good way to test and get move draw quick into a new
+        Pygame project where drawing polygons is needed, because it shows you the coordinates on the screen.
+        
+        Author:
+        
+        This Application is created by {app_info['__author__']}, a Software developer, feel free to visit {app_info['__website__']}
+        {app_info['__author__']} {app_info['__copyright__']}    
+        {app_info['__app__']}    
+        """
 
-        about_text1 = """This Application is created by Federico Bau federicobau.dev © Copyright 2022"""
-        font_img = self.app.font.render(about_text1, True, (255, 255, 255))
-        about_text2 = """and is used for creating Pygame GUI applications or just add GUI functionalities to a Pygame Game"""
-        font_img2 = self.app.font.render(about_text2, True, (255, 255, 255))
+        font_imgs = []
+        for line in about_text.split('\n'):
+            font_imgs.append(self.app.font.render(line, True, (255, 255, 255)))
 
         def _update():
             components_gui.draw(self.app.background)
             components_gui.update()
 
-            div.image.blit(font_img, (50, 150))
-            div.image.blit(font_img2, (50, 175))
+            for i, text in enumerate(font_imgs):
+                div.image.blit(text, (50, 150 + ( i * 25)))
+
+
 
         return _update

@@ -18,25 +18,24 @@ Todo:
     * 5) Make database (SQLite or simple JSON?=
     * 6) Load from database
     * 7) Save from database
+    * 8) Make circles and other shapes
+    * 9) Add animation system:
+        * 1) Create some default animations
+        * 2) Add a animation maker?
 
 Fixme:
     * 1) Add 'vertices' button is broken. see tag 'FIXME_IS_BROKEN'
 
-
-
-
-
-
 """
 
-
+__version__ = "0.0.1"
 __author__ = "Federico Bau"
 __website__ = "https://federicobau.dev/"
-__copyright__ = "Copyright 2022, federicobau.dev"
+__copyright__ = "© Copyright 2022, federicobau.dev"
 __credits__ = []
 __license__ = "MIT"
-__version__ = "0.0.1"
 __maintainer__ = "Federico bau"
 __email__ = "info@federicobau.dev"
 __emails__ = ["info@federicobau.dev", "fredbau91@gmail.com"]
 __status__ = "Prototype"
+__app__ = f'V {__version__} {__status__}, {__license__}'
