@@ -5,20 +5,25 @@ Pygame Polygons
 
 **Current Version : V 0.0.1 Protoype**
 
+_A Pygame Application done to build more Pygame applications / games
+Basically I needed a tool that would easily make me able to draw shapes / Polygons on a Pygame screen and be able to
+quickly see the vertices x,y coordinates._
+
+_Because you can also move the polygons around, this provide a good way to test and get move draw quick into a new
+Pygame project where drawing polygons is needed, because it shows you the coordinates on the screen._
+
+
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/Naereen/StrapDown.js.svg)](https://GitHub.com/Naereen/StrapDown.js/releases/)
 
 [![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
 
+If this project help you reduce time to develop, learn or anything positive, I would accept your support :)  <br/>
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.buymeacoffee.com/Koubae)
 
-A Pygame Application done to build more Pygame applications / games
-Basically I needed a tool that would easily make me able to draw shapes / Polygons on a Pygame screen and be able to
-quickly see the vertices x,y coordinates.
+### Youtube Video
 
-Because you can also move the polygons around, this provide a good way to test and get move draw quick into a new
-Pygame project where drawing polygons is needed, because it shows you the coordinates on the screen.
-
-Watch a small presentation here [![video](https://img.youtube.com/vi/Uq2U87Lqgw4/1.jpg)](https://www.youtube.com/watch?v=Uq2U87Lqgw4&t=16s)
+[![video](https://img.youtube.com/vi/Uq2U87Lqgw4/1.jpg)](https://www.youtube.com/watch?v=Uq2U87Lqgw4&t=16s)
 
 ### Github / Markdown Budget
 
