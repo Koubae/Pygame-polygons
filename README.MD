@@ -7,6 +7,12 @@ Pygame Polygons
 
 * First version: [V01.01.01-dev](https://github.com/Koubae/Pygame-polygons/tree/release/V01.01.01-dev)
 
+##### Requirements
+
+* OS: Windows / Linux
+* Python 3.12
+
+
 _A Pygame Application done to build more Pygame applications / games
 Basically I needed a tool that would easily make me able to draw shapes / Polygons on a Pygame screen and be able to
 quickly see the vertices x,y coordinates._
